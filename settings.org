@@ -278,12 +278,6 @@ re-downloaded in order to locate PACKAGE."
   (error
     (package-refresh-contents)
     (init--install-packages)))
-
-
-(eval-when-compile
-  (require 'use-package))
-(require 'diminish)                ;; if you use :diminish
-(require 'bind-key)                ;; if you use any :bind variant
 #+end_src
 
 * Save point position between sessions
