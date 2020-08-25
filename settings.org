@@ -9,16 +9,19 @@ You should definately check out his .emacs.d repo for more awesome stuff. magnar
 As a starting point I used his files and combined them into one file using org-mode.
 This way I have access to all the configurations in one spot. 
 
+* Open Settings directly
+#+begin_src emacs-lisp
+(defun open-config ()
+  "Open EMACS configuration"
+  (interactive)
+  (find-file-other-window "~/.emacs.d/settings.org"))
+#+end_src
+
 * Turn off mouse interface early in startup to avoid momentary display
 #+begin_src emacs-lisp
 (if (fboundp 'menu-bar-mode) (menu-bar-mode -1))
 (if (fboundp 'tool-bar-mode) (tool-bar-mode -1))
 (if (fboundp 'scroll-bar-mode) (scroll-bar-mode -1))
-#+end_src
-
-* Packages
-#+begin_src emacs-lisp
-(package-initialize)
 #+end_src
 
 * Remove security vulnerability
@@ -203,13 +206,6 @@ This way I have access to all the configurations in one spot.
 (setq vc-make-backup-files t)
 #+end_src
 
-* Save point position between sessions
-#+begin_src emacs-lisp
-(require 'saveplace)
-(setq-default save-place t)
-(setq save-place-file (expand-file-name ".places" user-emacs-directory))
-#+end_src
-
 * Set OS
 ** MacOS
 #+begin_src emacs-lisp
@@ -225,7 +221,13 @@ This way I have access to all the configurations in one spot.
 #+begin_src emacs-lisp
 (setq is-linux (equal system-type 'gnu/linux))
 #+end_src
-* Setup packages
+
+* Packages
+#+begin_src emacs-lisp
+(package-initialize)
+#+end_src
+
+* Packages
 #+begin_src emacs-lisp
 (require 'package)
 (require 'dash)
@@ -247,7 +249,7 @@ This way I have access to all the configurations in one spot.
       (package-install it)))
   (delete-other-windows))
 
-;;; On-demand installation of packages
+;; On-demand installation of packages
 
 (defun require-package (package &optional min-version no-refresh)
   "Install given PACKAGE, optionally requiring MIN-VERSION.
@@ -268,6 +270,7 @@ re-downloaded in order to locate PACKAGE."
   (packages-install
     '(
       magit
+      org
       )))
 
 (condition-case nil
@@ -275,9 +278,22 @@ re-downloaded in order to locate PACKAGE."
   (error
     (package-refresh-contents)
     (init--install-packages)))
+
+
+(eval-when-compile
+  (require 'use-package))
+(require 'diminish)                ;; if you use :diminish
+(require 'bind-key)                ;; if you use any :bind variant
 #+end_src
 
-* Loading sane-defaults
+* Save point position between sessions
+#+begin_src emacs-lisp
+(require 'saveplace)
+(setq-default save-place t)
+(setq save-place-file (expand-file-name ".places" user-emacs-directory))
+#+end_src
+
+* Sane-defaults
 ** Allow pasting selection outside of Emacs
 #+begin_src emacs-lisp
 (setq x-select-enable-clipboard t)
