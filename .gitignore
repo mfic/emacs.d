@@ -1,5 +1,10 @@
 *
 !.git
 !.gitignore
+!.gitmodules
+!README.org
 !init.el
 !settings.org
+!custom.el
+!users/
+!site-lisp/

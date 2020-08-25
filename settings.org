@@ -1,4 +1,154 @@
-* Turn off menu bar
-#+BEGIN_SRC emacs-lisp
-(menu-bar-mode -1)
-#+END_SRC
+#-*- mode: org -*-
+#+TITLE: Emacs-Settings
+#+STARTUP: showall
+
+* Turn off mouse interface early in startup to avoid momentary display
+#+begin_src emacs-lisp
+(if (fboundp 'menu-bar-mode) (menu-bar-mode -1))
+(if (fboundp 'tool-bar-mode) (tool-bar-mode -1))
+(if (fboundp 'scroll-bar-mode) (scroll-bar-mode -1))
+#+end_src
+
+* Packages
+#+begin_src emacs-lisp
+(package-initialize)
+#+end_src
+
+* Remove security vulnerability
+#+begin_src emacs-lisp
+(eval-after-load "enriched"
+  '(defun enriched-decode-display-prop (start end &optional param)
+     (list start end)))
+#+end_src
+
+* No spash screen
+#+begin_src emacs-lisp
+(setq inhibit-startup-message t)
+#+end_src
+
+* Set Path to dependencies
+#+begin_src emacs-lisp
+(setq site-lisp-dir
+      (expand-file-name "site-lisp" user-emacs-directory))
+
+(setq settings-dir
+      (expand-file-name "settings" user-emacs-directory))
+#+end_src
+
+* Load Path
+#+begin_src emacs-lisp
+(add-to-list 'load-path settings-dir)
+(add-to-list 'load-path site-lisp-dir)
+#+end_src
+
+* Keep emcas custom-settings in sepeate file
+#+begin_src emacs-lisp
+(setq custom-file (expand-file-name "custom.el" user-emacs-directory))
+(load custom-file)
+#+end_src
+
+* Set up appearance early
+#+begin_src emacs-lisp :tangle no
+(require 'appearance)
+#+end_src
+
+* Settings for currently logged in user
+#+begin_src emacs-lisp
+(setq user-settings-dir
+      (concat user-emacs-directory "users/" user-login-name))
+(add-to-list 'load-path user-settings-dir)
+#+end_src
+
+* Add external projects to load path
+#+begin_src emacs-lisp
+(dolist (project (directory-files site-lisp-dir t "\\w+"))
+  (when (file-directory-p project)
+    (add-to-list 'load-path project)))
+#+end_src
+
+* Write backup file to own directory
+#+begin_src emacs-lisp
+(setq backup-directory-alist
+      `(("." . ,(expand-file-name
+                 (concat user-emacs-directory "backups")))))
+#+end_src
+
+* Write all autosave files in tmp dir
+#+begin_src emacs-lisp
+(setq auto-save-file-name-transforms
+      `((".*" ,temporary-file-directory t)))
+#+end_src
+
+* Don't write lock file
+#+begin_src emacs-lisp
+(setq create-lockfiles nil)
+#+end_src
+
+* Make backup of files
+#+begin_src emacs-lisp
+(setq vc-make-backup-files t)
+#+end_src
+
+* Save point position between sessions
+#+begin_src emacs-lisp
+(require 'saveplace)
+(setq-default save-place t)
+(setq save-place-file (expand-file-name ".places" user-emacs-directory))
+#+end_src
+
+* Set OS
+#+begin_src emacs-lisp
+(setq is-mac (equal system-type 'darwin))
+#+end_src
+
+* Setup packages
+#+begin_src emacs-lisp
+(require 'package)
+(require 'dash)
+
+;; Add melpa to package repos
+(add-to-list 'package-archives '("melpa" . "http://melpa.milkbox.net/packages/") t)
+(add-to-list 'package-archives '("melpa-stable" . "http://stable.melpa.org/packages/") t)
+
+(setq package-pinned-packages '())
+
+(package-initialize)
+
+(unless (file-exists-p "~/.emacs.d/elpa/archives/melpa")
+  (package-refresh-contents))
+
+(defun packages-install (packages)
+  (--each packages
+    (when (not (package-installed-p it))
+      (package-install it)))
+  (delete-other-windows))
+
+;;; On-demand installation of packages
+
+(defun require-package (package &optional min-version no-refresh)
+  "Install given PACKAGE, optionally requiring MIN-VERSION.
+If NO-REFRESH is non-nil, the available package lists will not be
+re-downloaded in order to locate PACKAGE."
+  (if (package-installed-p package min-version)
+      t
+    (if (or (assoc package package-archive-contents) no-refresh)
+        (package-install package)
+      (progn
+        (package-refresh-contents)
+        (require-package package min-version t)))))
+#+end_src
+
+* Install extentions if they are missing
+#+begin_src emacs-lisp
+(defun init--install-packages()
+  (packages-install
+    '(
+      magit
+      )))
+
+(condition-case nil
+    (init--install-packages)
+  (error
+    (package-refresh-contents)
+    (init--install-packages)))
+#+end_src
