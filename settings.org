@@ -1,4 +1,4 @@
-#-*- mode: org -*-
+++++++#-*- mode: org -*-
 #+TITLE: Emacs-Settings
 #+STARTUP: showall
 #+Author: Jan Quest
@@ -171,9 +171,9 @@ This way I have access to all the configurations in one spot.
 
 * Settings for currently logged in user
 #+begin_src emacs-lisp
-(setq user-settings-dir
-      (concat user-emacs-directory "users/" user-login-name))
-(add-to-list 'load-path user-settings-dir)
+(org-babel-load-file
+ (expand-file-name (concat user-emacs-directory "users/" user-login-name "/init.org")
+                   user-emacs-directory))
 #+end_src
 
 * Add external projects to load path
@@ -508,4 +508,9 @@ the mnemonic is C-x REALLY QUIT
 #+begin_src eamacs-lisp
 (global-set-key (kbd "C-x r q") 'save-buffers-kill-terminal)
 (global-set-key (kbd "C-x C-c") 'delete-frame)
+#+end_src
+
+* Error Message cl depreciated
+#+begin_src emacs-lisp
+(setq byte-compile-warnings '(cl-functions))
 #+end_src

@@ -1,0 +1,7 @@
+* Function to open Main Notes file
+#+begin_src emacs-lisp
+(defun open-notes ()
+  "Open Notes"
+  (interactive)
+  (find-file-other-window "C:/Users/quest/Nextcloud/Documents/notes/notes.org"))
+#+end_src
